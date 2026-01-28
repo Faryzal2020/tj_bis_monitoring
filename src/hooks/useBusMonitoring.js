@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 
-const CENTRAL_WS_URL = 'http://192.168.18.234:8000';
+const CENTRAL_WS_URL = 'http://192.168.18.234:8002';
 const DIRECT_CHECK_PORT = 3005;
 
 export function useBusMonitoring() {
