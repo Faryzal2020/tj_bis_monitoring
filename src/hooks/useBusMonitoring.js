@@ -12,7 +12,13 @@ export function useBusMonitoring() {
 
     // Initialize Socket.IO connection
     useEffect(() => {
-        // 1. Connect to Central Backend
+        // 1. Log Connection Details
+        console.group('🔌 Remote Connection Setup');
+        console.log('Central Backend URL:', CENTRAL_WS_URL);
+        console.log('Direct Check Port:', DIRECT_CHECK_PORT);
+        console.groupEnd();
+
+        // 2. Connect to Central Backend
         const socket = io(CENTRAL_WS_URL, {
             reconnectionAttempts: 5,
             transports: ['websocket', 'polling'], // Prioritize WebSocket
@@ -20,7 +26,8 @@ export function useBusMonitoring() {
         socketRef.current = socket;
 
         socket.on('connect', () => {
-            console.log('Connected to Central Backend');
+            console.log('✅ Connected to Central Backend');
+            console.log('Socket ID:', socket.id);
             setConnectionStatus('connected');
             // Subscribe to all GPS updates
             socket.emit('gps:subscribe:all');
@@ -28,18 +35,27 @@ export function useBusMonitoring() {
             socket.emit('bus:health:all');
         });
 
-        socket.on('disconnect', () => {
-            console.log('Disconnected from Central Backend');
+        socket.on('disconnect', (reason) => {
+            console.warn('⚠️ Disconnected from Central Backend. Reason:', reason);
             setConnectionStatus('disconnected');
         });
 
         socket.on('connect_error', (err) => {
-            console.error('Connection Error:', err);
+            console.error('❌ Connection Error:', err.message);
             setConnectionStatus('error');
+        });
+
+        socket.on('reconnect_attempt', (attempt) => {
+            console.log(`🔄 Reconnecting attempt #${attempt}...`);
+        });
+
+        socket.on('reconnect_error', (err) => {
+            console.error('❌ Reconnection Error:', err.message);
         });
 
         // Handle initial bulk GPS data
         socket.on('gps:all', (data) => {
+            console.log('📦 Received initial bulk GPS data:', Object.keys(data).length, 'records');
             setBuses(prev => {
                 const next = { ...prev };
                 Object.keys(data).forEach(key => {
@@ -53,6 +69,8 @@ export function useBusMonitoring() {
         socket.on('gps', (payload) => {
             // payload: { machine_code, data }
             const { machine_code, data } = payload;
+            // distinct visual log for frequent updates (optional, removing if too noisy, keeping for now as requested)
+            // console.debug(`📍 GPS Update for ${machine_code}:`, data); 
             setBuses(prev => ({
                 ...prev,
                 [machine_code]: {
@@ -65,6 +83,7 @@ export function useBusMonitoring() {
 
         // Handle Bus Health Data (WebSocket status, etc)
         socket.on('bus:health:all:response', (payload) => {
+            console.log('🏥 Received bus health data', payload);
             // payload: { health: { kode_machine: { websocket_connected, ... } } }
             const { health } = payload;
             setBuses(prev => {
@@ -77,6 +96,7 @@ export function useBusMonitoring() {
         });
 
         return () => {
+            console.log('🔌 Cleaning up socket connection...');
             socket.disconnect();
         };
     }, []);
@@ -84,6 +104,9 @@ export function useBusMonitoring() {
     // Function to perform direct health check (Redundancy)
     const checkDirectHealth = async (ipAddress, machineCode) => {
         if (!ipAddress) return;
+
+        console.log(`🔍 Starting Direct Health Check for ${machineCode} at ${ipAddress}:${DIRECT_CHECK_PORT}...`);
+        const startTime = performance.now();
 
         try {
             setDirectStatuses(prev => ({ ...prev, [machineCode]: 'checking' }));
@@ -96,16 +119,21 @@ export function useBusMonitoring() {
             });
             clearTimeout(timeoutId);
 
+            const duration = (performance.now() - startTime).toFixed(2);
+
             if (response.ok) {
                 const data = await response.json();
+                console.log(`✅ Direct Health Check Passed for ${machineCode} (${duration}ms):`, data);
                 setDirectStatuses(prev => ({
                     ...prev,
                     [machineCode]: { status: 'online', data, timestamp: Date.now() }
                 }));
             } else {
-                throw new Error('Response not ok');
+                throw new Error(`Response not ok: ${response.status} ${response.statusText}`);
             }
         } catch (error) {
+            const duration = (performance.now() - startTime).toFixed(2);
+            console.error(`❌ Direct Health Check Failed for ${machineCode} (${duration}ms):`, error.message);
             setDirectStatuses(prev => ({
                 ...prev,
                 [machineCode]: { status: 'offline', error: error.message, timestamp: Date.now() }
