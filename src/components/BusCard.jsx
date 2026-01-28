@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { MapPin, Navigation, Clock, RefreshCw } from 'lucide-react';
 import { StatusBadge } from './StatusBadge';
 
-export function BusCard({ bus, machineCode, directStatus, onCheckDirect }) {
+export function BusCard({ bus, machineCode, directStatus, onCheckDirect, onClick }) {
     // bus: { health: { websocket_connected, ... }, gps: { latitude, longitude, speed ... } }
 
     const isCentralConnected = bus?.health?.websocket_connected;
@@ -22,8 +22,10 @@ export function BusCard({ bus, machineCode, directStatus, onCheckDirect }) {
     const lng = bus?.gps?.longitude || directStatus?.data?.gps?.longitude || 0;
 
     return (
-        <div className={`glass-panel p-4 transition-all duration-300 hover:scale-[1.02] ${cardStatus === 'offline' ? 'opacity-70 grayscale' : ''
-            }`}>
+        <div
+            onClick={onClick}
+            className={`glass-panel p-4 transition-all duration-300 hover:scale-[1.02] cursor-pointer ${cardStatus === 'offline' ? 'opacity-70 grayscale' : ''}`}
+        >
             <div className="flex justify-between items-start mb-4">
                 <div>
                     <h3 className="font-bold text-lg text-white">{bus?.health?.kode_lambung || machineCode}</h3>
@@ -56,7 +58,10 @@ export function BusCard({ bus, machineCode, directStatus, onCheckDirect }) {
 
                 {!isCentralConnected && (
                     <button
-                        onClick={() => onCheckDirect(bus?.health?.ip_address || '127.0.0.1', machineCode)}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onCheckDirect(bus?.health?.ip_address || '127.0.0.1', machineCode);
+                        }}
                         className="px-3 py-1 bg-brand-primary/20 hover:bg-brand-primary/40 text-brand-primary text-xs rounded-lg transition-colors flex items-center gap-1"
                         disabled={directStatus === 'checking'}
                     >

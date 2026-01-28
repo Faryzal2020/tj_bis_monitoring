@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 
-const CENTRAL_WS_URL = 'http://192.168.18.234:8002';
-const DIRECT_CHECK_PORT = 3005;
+const CENTRAL_WS_URL = import.meta.env.VITE_CENTRAL_WS_URL || 'http://192.168.18.234:8002';
+const DIRECT_CHECK_PORT = import.meta.env.VITE_DIRECT_CHECK_PORT || 3005;
 
 export function useBusMonitoring() {
     const [buses, setBuses] = useState({});
@@ -15,6 +15,7 @@ export function useBusMonitoring() {
         // 1. Connect to Central Backend
         const socket = io(CENTRAL_WS_URL, {
             reconnectionAttempts: 5,
+            transports: ['websocket', 'polling'], // Prioritize WebSocket
         });
         socketRef.current = socket;
 
@@ -112,10 +113,20 @@ export function useBusMonitoring() {
         }
     };
 
+    // Function to manually refresh/subscribe data
+    const refreshData = () => {
+        if (socketRef.current && socketRef.current.connected) {
+            console.log('Refreshing data...');
+            socketRef.current.emit('gps:subscribe:all');
+            socketRef.current.emit('bus:health:all');
+        }
+    };
+
     return {
         buses,
         connectionStatus,
         directStatuses,
-        checkDirectHealth
+        checkDirectHealth,
+        refreshData
     };
 }

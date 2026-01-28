@@ -1,7 +1,45 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Dashboard } from './components/Dashboard'
+import { BusDetails } from './components/BusDetails'
+import { useBusMonitoring } from './hooks/useBusMonitoring'
 
 function App() {
+    const { buses, connectionStatus, directStatuses, checkDirectHealth, refreshData } = useBusMonitoring();
+    const [view, setView] = useState('dashboard'); // 'dashboard' | 'details'
+    const [selectedBusId, setSelectedBusId] = useState(null);
+
+    // Test bus logic - Centralized here so it's available for both views
+    const showTestBus = connectionStatus !== 'connected' && Object.keys(buses).length === 0;
+
+    // Prepare the unified list of buses (including test fallback)
+    const allBuses = showTestBus ? {
+        'MC-TEST': {
+            health: {
+                kode_lambung: 'TJ-TEST (Fallback Test)',
+                ip_address: '127.0.0.1',
+                websocket_connected: false
+            },
+            gps: {
+                speed: 0,
+                latitude: -6.2088,
+                longitude: 106.8456,
+                timestamp: Date.now()
+            }
+        }
+    } : buses;
+
+    const handleBusClick = (id) => {
+        setSelectedBusId(id);
+        setView('details');
+    };
+
+    const handleBack = () => {
+        setView('dashboard');
+        setSelectedBusId(null);
+    };
+
+    const selectedBus = selectedBusId ? allBuses[selectedBusId] : null;
+
     return (
         <div className="min-h-screen bg-slate-900 text-white selection:bg-brand-primary/30">
             {/* Background Gradient Mesh */}
@@ -11,8 +49,24 @@ function App() {
             </div>
 
             {/* Content */}
-            <div className="relative z-10">
-                <Dashboard />
+            <div className="relative z-10 transition-all duration-500 ease-in-out">
+                {view === 'dashboard' ? (
+                    <Dashboard
+                        buses={allBuses}
+                        connectionStatus={connectionStatus}
+                        directStatuses={directStatuses}
+                        checkDirectHealth={checkDirectHealth}
+                        refreshData={refreshData}
+                        onBusClick={handleBusClick}
+                        showTestBus={showTestBus}
+                    />
+                ) : (
+                    <BusDetails
+                        bus={selectedBus}
+                        machineCode={selectedBusId}
+                        onBack={handleBack}
+                    />
+                )}
             </div>
         </div>
     )
