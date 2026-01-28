@@ -14,7 +14,6 @@ export function useBusMonitoring() {
     useEffect(() => {
         // 1. Connect to Central Backend
         const socket = io(CENTRAL_WS_URL, {
-            transports: ['websocket'],
             reconnectionAttempts: 5,
         });
         socketRef.current = socket;
