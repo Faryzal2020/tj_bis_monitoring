@@ -34,7 +34,7 @@ export function Dashboard({ buses, connectionStatus, directStatuses, checkDirect
                     <div>
                         <h1 className="text-2xl font-bold text-white flex items-center gap-2">
                             <LayoutDashboard className="text-brand-primary" />
-                            TJ BIS Monitoring
+                            VA-Tech TJ Device Live Monitoring
                         </h1>
                         <p className="text-slate-400 text-sm">Real-time GPS & Health Tracker</p>
                     </div>

@@ -33,7 +33,7 @@ export function BusCard({ bus, machineCode, directStatus, onCheckDirect, onClick
                 </div>
                 <div className="flex flex-col gap-1 items-end">
                     <StatusBadge status={isCentralConnected ? 'connected' : 'offline'} type="central" />
-                    {(!isCentralConnected && directStatus) && (
+                    {directStatus && (
                         <StatusBadge status={directStatus.status} type="direct" />
                     )}
                 </div>
@@ -56,23 +56,21 @@ export function BusCard({ bus, machineCode, directStatus, onCheckDirect, onClick
                     <span>{timeSinceUpdate ? `${timeSinceUpdate}s ago` : 'No Data'}</span>
                 </div>
 
-                {!isCentralConnected && (
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onCheckDirect(bus?.health?.ip_address || '127.0.0.1', machineCode);
-                        }}
-                        className="px-3 py-1 bg-brand-primary/20 hover:bg-brand-primary/40 text-brand-primary text-xs rounded-lg transition-colors flex items-center gap-1"
-                        disabled={directStatus === 'checking'}
-                    >
-                        {directStatus === 'checking' ? (
-                            <RefreshCw className="w-3 h-3 animate-spin" />
-                        ) : (
-                            <RefreshCw className="w-3 h-3" />
-                        )}
-                        {directStatus === 'checking' ? 'Checking...' : 'Direct Check'}
-                    </button>
-                )}
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onCheckDirect(bus?.health?.ip_address || '127.0.0.1', machineCode);
+                    }}
+                    className="px-3 py-1 bg-brand-primary/20 hover:bg-brand-primary/40 text-brand-primary text-xs rounded-lg transition-colors flex items-center gap-1"
+                    disabled={directStatus === 'checking'}
+                >
+                    {directStatus === 'checking' ? (
+                        <RefreshCw className="w-3 h-3 animate-spin" />
+                    ) : (
+                        <RefreshCw className="w-3 h-3" />
+                    )}
+                    {directStatus === 'checking' ? 'Checking...' : 'Direct Check'}
+                </button>
             </div>
         </div>
     );
