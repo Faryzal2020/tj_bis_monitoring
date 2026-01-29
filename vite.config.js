@@ -9,6 +9,10 @@ export default defineConfig(({ mode }) => {
         server: {
             port: parseInt(env.PORT) || 4173,
             host: true
+        },
+        preview: {
+            port: parseInt(env.PORT) || 4173,
+            host: true
         }
     }
 })
