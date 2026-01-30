@@ -8,11 +8,13 @@ export default defineConfig(({ mode }) => {
         plugins: [react()],
         server: {
             port: parseInt(env.PORT) || 4173,
-            host: true
+            host: true,
+            allowedHosts: ['dlm.bussystem.xyz']
         },
         preview: {
             port: parseInt(env.PORT) || 4173,
-            host: true
+            host: true,
+            allowedHosts: ['dlm.bussystem.xyz']
         }
     }
 })
