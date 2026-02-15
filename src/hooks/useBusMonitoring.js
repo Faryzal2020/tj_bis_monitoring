@@ -30,10 +30,15 @@ export function useBusMonitoring() {
             console.log('Socket ID:', socket.id);
             setConnectionStatus('connected');
             // Subscribe to all GPS updates
+            console.log('📡 Subscribing to GPS updates...');
             socket.emit('gps:subscribe:all');
+
             // Subscribe to continuous bus health updates
+            console.log('📡 Subscribing to Bus Health updates...');
             socket.emit('bus:health:subscribe');
+
             // Request initial health data
+            console.log('Requesting initial health data...');
             socket.emit('bus:health:all');
         });
 
@@ -99,6 +104,7 @@ export function useBusMonitoring() {
 
         // Handle Single Bus Health Update (Push)
         socket.on('bus:health:update', (payload) => {
+            console.log(`🏥 [PUSH] Received health update for ${payload.kode_machine}:`, payload);
             // payload: { kode_machine, health: { ... } }
             const { kode_machine, health } = payload;
             // console.debug(`🏥 Health Update for ${kode_machine}:`, health.status);
@@ -106,7 +112,8 @@ export function useBusMonitoring() {
                 ...prev,
                 [kode_machine]: {
                     ...prev[kode_machine],
-                    health: health
+                    health: health,
+                    lastHealthUpdate: Date.now() // Track when we last got a health update
                 }
             }));
         });

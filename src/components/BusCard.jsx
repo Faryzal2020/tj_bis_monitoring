@@ -15,7 +15,7 @@ export function BusCard({ bus, machineCode, directStatus, onCheckDirect, onClick
         return 'offline';
     }, [isCentralConnected, isDirectOnline]);
 
-    const lastUpdate = bus?.gps?.received_at || directStatus?.data?.gps?.timestamp;
+    const lastUpdate = bus?.lastHealthUpdate || bus?.gps?.received_at || directStatus?.data?.gps?.timestamp;
     const timeSinceUpdate = lastUpdate ? Math.floor((Date.now() - new Date(lastUpdate).getTime()) / 1000) : null;
 
     const lat = bus?.gps?.latitude || directStatus?.data?.gps?.latitude || 0;
