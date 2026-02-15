@@ -6,20 +6,6 @@ export function Dashboard({ buses, connectionStatus, directStatuses, checkDirect
     const [searchQuery, setSearchQuery] = useState('');
     // Control Panel State
     const [isPanelOpen, setIsPanelOpen] = useState(false);
-    const [autoRefresh, setAutoRefresh] = useState(false);
-    const [refreshInterval, setRefreshInterval] = useState(2);
-
-    // Auto-refresh logic
-    useEffect(() => {
-        let interval;
-        if (autoRefresh && refreshInterval > 0) {
-            interval = setInterval(() => {
-                refreshData();
-            }, refreshInterval * 1000);
-        }
-        return () => clearInterval(interval);
-    }, [autoRefresh, refreshInterval, refreshData]);
-
     // Filter logic
     const filteredBuses = Object.entries(buses).filter(([code, bus]) => {
         const query = searchQuery.toLowerCase();
@@ -76,25 +62,9 @@ export function Dashboard({ buses, connectionStatus, directStatuses, checkDirect
                         </button>
 
                         {isPanelOpen && (
-                            <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-700/50 animate-fade-in">
-                                <div className="flex items-center justify-between bg-slate-800/50 p-3 rounded text-sm">
-                                    <span className="text-slate-300">Auto Refresh</span>
-                                    <label className="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" checked={autoRefresh} onChange={(e) => setAutoRefresh(e.target.checked)} className="sr-only peer" />
-                                        <div className="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-primary"></div>
-                                    </label>
-                                </div>
-
-                                <div className="flex items-center justify-between bg-slate-800/50 p-3 rounded text-sm">
-                                    <span className="text-slate-300">Interval (s)</span>
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        value={refreshInterval}
-                                        onChange={(e) => setRefreshInterval(Number(e.target.value))}
-                                        disabled={!autoRefresh}
-                                        className="w-16 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-right text-white disabled:opacity-50"
-                                    />
+                            <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-700/50 animate-fade-in">
+                                <div className="flex items-center justify-between text-sm text-slate-400 bg-slate-800/30 p-3 rounded">
+                                    <span>Updates are now pushed automatically in real-time.</span>
                                 </div>
 
                                 <button
@@ -102,7 +72,7 @@ export function Dashboard({ buses, connectionStatus, directStatuses, checkDirect
                                     className="flex items-center justify-center gap-2 bg-brand-primary/20 hover:bg-brand-primary/40 text-brand-primary border border-brand-primary/30 rounded p-3 text-sm transition-all active:scale-95"
                                 >
                                     <RefreshCw className="w-4 h-4" />
-                                    Refresh All Now
+                                    Force Refresh All
                                 </button>
                             </div>
                         )}

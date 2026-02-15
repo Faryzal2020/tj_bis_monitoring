@@ -31,6 +31,8 @@ export function useBusMonitoring() {
             setConnectionStatus('connected');
             // Subscribe to all GPS updates
             socket.emit('gps:subscribe:all');
+            // Subscribe to continuous bus health updates
+            socket.emit('bus:health:subscribe');
             // Request initial health data
             socket.emit('bus:health:all');
         });
@@ -81,9 +83,9 @@ export function useBusMonitoring() {
             }));
         });
 
-        // Handle Bus Health Data (WebSocket status, etc)
+        // Handle Bus Health Data (WebSocket status, etc) - Initial Load / All
         socket.on('bus:health:all:response', (payload) => {
-            console.log('🏥 Received bus health data', payload);
+            console.log('🏥 Received bus health data (all)', payload);
             // payload: { health: { kode_machine: { websocket_connected, ... } } }
             const { health } = payload;
             setBuses(prev => {
@@ -93,6 +95,20 @@ export function useBusMonitoring() {
                 });
                 return next;
             });
+        });
+
+        // Handle Single Bus Health Update (Push)
+        socket.on('bus:health:update', (payload) => {
+            // payload: { kode_machine, health: { ... } }
+            const { kode_machine, health } = payload;
+            // console.debug(`🏥 Health Update for ${kode_machine}:`, health.status);
+            setBuses(prev => ({
+                ...prev,
+                [kode_machine]: {
+                    ...prev[kode_machine],
+                    health: health
+                }
+            }));
         });
 
         return () => {
