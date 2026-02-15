@@ -9,12 +9,12 @@ export default defineConfig(({ mode }) => {
         server: {
             port: parseInt(env.PORT) || 4173,
             host: true,
-            allowedHosts: ['dlm.bussystem.xyz']
+            allowedHosts: '*'
         },
         preview: {
             port: parseInt(env.PORT) || 4173,
             host: true,
-            allowedHosts: ['dlm.bussystem.xyz']
+            allowedHosts: '*'
         }
     }
 })
