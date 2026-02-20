@@ -20,6 +20,8 @@ export function BusCard({ bus, machineCode, directStatus, onCheckDirect, onClick
 
     const lat = bus?.gps?.latitude || directStatus?.data?.gps?.latitude || 0;
     const lng = bus?.gps?.longitude || directStatus?.data?.gps?.longitude || 0;
+    const hasGpsData = lat !== 0 || lng !== 0;
+    const isFallbackData = bus?.gps?.source?.startsWith('db_fallback');
 
     return (
         <div
@@ -44,9 +46,13 @@ export function BusCard({ bus, machineCode, directStatus, onCheckDirect, onClick
                     <Navigation className="w-4 h-4 text-brand-primary" />
                     <span>{bus?.gps?.speed || 0} km/h</span>
                 </div>
-                <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-brand-secondary" />
-                    <span>{lat.toFixed(4)}, {lng.toFixed(4)}</span>
+                <div className="flex items-center gap-2" title={isFallbackData ? "Historical location from database" : "Real-time location"}>
+                    <MapPin className={`w-4 h-4 ${isFallbackData ? 'text-amber-500' : hasGpsData ? 'text-brand-secondary' : 'text-slate-500'}`} />
+                    <span className="truncate">
+                        {!hasGpsData ? 'No Signal' :
+                            isFallbackData ? `${lat.toFixed(4)}, ${lng.toFixed(4)} (DB)` :
+                                `${lat.toFixed(4)}, ${lng.toFixed(4)}`}
+                    </span>
                 </div>
             </div>
 

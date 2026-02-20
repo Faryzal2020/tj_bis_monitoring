@@ -6,6 +6,8 @@ export function BusDetails({ bus, machineCode, onBack }) {
 
     const { health, gps } = bus;
     const isCentralConnected = health?.websocket_connected;
+    const hasGpsData = (gps?.latitude !== 0 && gps?.latitude != null) || (gps?.longitude !== 0 && gps?.longitude != null);
+    const isFallbackData = gps?.source?.startsWith('db_fallback');
 
     return (
         <div className="container mx-auto p-4 max-w-5xl animate-fade-in">
@@ -43,11 +45,16 @@ export function BusDetails({ bus, machineCode, onBack }) {
                     </h3>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <TelemetryItem label="Latitude" value={gps?.latitude?.toFixed(6) ?? 'N/A'} />
-                        <TelemetryItem label="Longitude" value={gps?.longitude?.toFixed(6) ?? 'N/A'} />
-                        <TelemetryItem label="Speed" value={`${gps?.speed ?? 0} km/h`} icon={<Gauge className="w-3 h-3" />} />
-                        <TelemetryItem label="Course" value={`${gps?.course ?? 0}°`} />
-                        <TelemetryItem label="GPS Time" value={gps?.timestamp ? new Date(gps.timestamp).toLocaleString() : 'N/A'} colSpan={2} />
+                        <TelemetryItem label="Latitude" value={hasGpsData ? gps?.latitude?.toFixed(6) : 'No Signal'} />
+                        <TelemetryItem label="Longitude" value={hasGpsData ? gps?.longitude?.toFixed(6) : 'No Signal'} />
+                        <TelemetryItem label="Speed" value={hasGpsData ? `${gps?.speed ?? 0} km/h` : 'N/A'} icon={<Gauge className="w-3 h-3" />} />
+                        <TelemetryItem label="Course" value={hasGpsData ? `${gps?.course ?? 0}°` : 'N/A'} />
+                        <TelemetryItem
+                            label={`GPS Time ${isFallbackData ? '(Historical DB Fallback)' : ''}`}
+                            value={gps?.timestamp || gps?.received_at ? new Date(gps.timestamp || gps.received_at).toLocaleString() : 'N/A'}
+                            colSpan={2}
+                            isWarning={isFallbackData}
+                        />
                     </div>
                 </div>
 
@@ -88,11 +95,11 @@ export function BusDetails({ bus, machineCode, onBack }) {
     );
 }
 
-function TelemetryItem({ label, value, icon, colSpan = 1 }) {
+function TelemetryItem({ label, value, icon, colSpan = 1, isWarning = false }) {
     return (
         <div className={`bg-slate-800/30 p-3 rounded-lg ${colSpan === 2 ? 'col-span-2' : ''}`}>
-            <p className="text-xs text-slate-500 mb-1 flex items-center gap-1">{icon} {label}</p>
-            <p className="text-lg font-bold text-slate-200">{value}</p>
+            <p className={`text-xs mb-1 flex items-center gap-1 ${isWarning ? 'text-amber-500' : 'text-slate-500'}`}>{icon} {label}</p>
+            <p className={`text-lg font-bold ${isWarning ? 'text-amber-100' : 'text-slate-200'}`}>{value}</p>
         </div>
     );
 }
