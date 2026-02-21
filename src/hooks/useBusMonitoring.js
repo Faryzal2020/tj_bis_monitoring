@@ -92,7 +92,7 @@ export function useBusMonitoring() {
         socket.on('bus:health:all:response', (payload) => {
             console.log('🏥 Received bus health data (all)', payload);
             // payload: { health: { kode_machine: { websocket_connected, ... } } }
-            const { health } = payload;
+            const health = payload?.health || {};
             setBuses(prev => {
                 const next = { ...prev };
                 Object.entries(health).forEach(([key, value]) => {
