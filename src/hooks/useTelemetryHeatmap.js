@@ -14,7 +14,11 @@ import { useState, useEffect, useCallback } from 'react';
 
 const CENTRAL_API_URL = import.meta.env.VITE_CENTRAL_API_URL || 'http://localhost:8000';
 
-export function useTelemetryHeatmap(machineCode, { days = 3, resolution = 0.002 } = {}) {
+// Configurable via .env (baked in at build time)
+const DEFAULT_DAYS = Number(import.meta.env.VITE_HEATMAP_DAYS) || 3;
+const DEFAULT_RESOLUTION = Number(import.meta.env.VITE_HEATMAP_RESOLUTION) || 0.002;
+
+export function useTelemetryHeatmap(machineCode, { days = DEFAULT_DAYS, resolution = DEFAULT_RESOLUTION } = {}) {
     const [obuData, setObuData] = useState(null);
     const [adsData, setAdsData] = useState(null);
     const [loading, setLoading] = useState(false);
