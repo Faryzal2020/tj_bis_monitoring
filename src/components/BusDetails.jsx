@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowLeft, Activity, MapPin, Wifi, Server, ShieldCheck, Thermometer, Gauge } from 'lucide-react';
+import { BusMapView } from './BusMapView';
 
 export function BusDetails({ bus, machineCode, onBack }) {
     if (!bus) return null;
@@ -37,6 +38,15 @@ export function BusDetails({ bus, machineCode, onBack }) {
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Map View */}
+                <div className="md:col-span-2">
+                    <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
+                        <MapPin className="text-brand-primary" />
+                        Live Map &amp; Telemetry Heatmap
+                    </h3>
+                    <BusMapView bus={bus} machineCode={machineCode} />
+                </div>
+
                 {/* GPS Telemetry */}
                 <div className="glass-panel p-6">
                     <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
